@@ -1,0 +1,111 @@
+﻿@page "/weightedhashtable"
+@using TablaDeHash.Models
+@inject NavigationManager Navigation
+
+<h3 class="text-center text-white">Tabla de Hash de Personas (Weighted Hash)</h3>
+
+<div class="form-group">
+    <label class="text-white">Nombre:</label>
+    <input @bind="nombre" class="form-control bg-dark text-white" />
+</div>
+<div class="form-group">
+    <label class="text-white">Número de Celular:</label>
+    <input @bind="numeroCelular" class="form-control bg-dark text-white" />
+</div>
+<div class="form-group">
+    <button @onclick="AgregarPersona" class="btn btn-primary">Agregar</button>
+    <button @onclick="EliminarPersona" class="btn btn-danger">Eliminar</button>
+</div>
+<div class="form-group">
+    <label class="text-white">Buscar Nombre:</label>
+    <input @bind="nombreBuscar" class="form-control bg-dark text-white" />
+    <button @onclick="BuscarPersona" class="btn btn-secondary mt-2">Buscar</button>
+</div>
+<div class="form-group">
+    <p class="text-white">Resultado: @resultado</p>
+</div>
+
+<h4 class="text-center text-white">Contenido de la Tabla de Hash:</h4>
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th>Índice</th>
+            <th>Nombre - Número de Celular</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < todosLosNodosAgrupados.Length; i++)
+        {
+            if (todosLosNodosAgrupados[i] != null)
+            {
+                <tr>
+                    <td>@todosLosNodosAgrupados[i].Indice</td>
+                    <td>
+                        @if (todosLosNodosAgrupados[i].PrimerNodo != null)
+                        {
+                            Nodo nodoActual = todosLosNodosAgrupados[i].PrimerNodo;
+                            while (nodoActual != null)
+                            {
+                                @($"{nodoActual.Clave} - {nodoActual.Valor}")
+                                if (nodoActual.Siguiente != null)
+                                {
+                                    <span> → </span>
+                                }
+                                nodoActual = nodoActual.Siguiente;
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div class="form-group mt-4">
+    <button @onclick="NavegarAPrincipal" class="btn btn-info">Regresar a Tabla de Hash Principal</button>
+</div>
+
+@code {
+    private string nombre;
+    private string numeroCelular;
+    private string nombreBuscar;
+    private string resultado;
+    private TablaDeHash tablaHash;
+    private NodoAgrupado[] todosLosNodosAgrupados;
+
+    protected override void OnInitialized()
+    {
+        tablaHash = new TablaDeHash(10, useSimpleHash: false, useWeightedHash: true);
+        ActualizarTabla();
+    }
+
+    private void AgregarPersona()
+    {
+        tablaHash.Agregar(nombre, numeroCelular);
+        nombre = string.Empty;
+        numeroCelular = string.Empty;
+        ActualizarTabla();
+    }
+
+    private void EliminarPersona()
+    {
+        tablaHash.Eliminar(nombre);
+        nombre = string.Empty;
+        ActualizarTabla();
+    }
+
+    private void BuscarPersona()
+    {
+        resultado = tablaHash.ObtenerValor(nombreBuscar);
+    }
+
+    private void ActualizarTabla()
+    {
+        todosLosNodosAgrupados = tablaHash.ObtenerTodosLosNodosAgrupados();
+    }
+
+    private void NavegarAPrincipal()
+    {
+        Navigation.NavigateTo("/");
+    }
+}
