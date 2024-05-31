@@ -79,7 +79,7 @@
 
     protected override void OnInitialized()
     {
-        tablaHash = new TablaDeHash(10, useSimpleHash: false, useWeightedHash: true);
+        tablaHash = new TablaDeHash(10, useSimpleHash: false, useWeightedHash: false); // Use CustomHashFunction
         ActualizarTabla();
     }
 
