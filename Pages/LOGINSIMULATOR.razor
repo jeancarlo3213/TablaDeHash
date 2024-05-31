@@ -1,28 +1,37 @@
-﻿@page "/"
+﻿@page "/LOGINSIMULATOR"
 @using TablaDeHash.Models
 @inject NavigationManager Navigation
 
-<h3 class="text-center text-white">Tabla de Hash de Personas</h3>
+<h3 class="text-center text-white">Simulación de Login con Tabla de Hash</h3>
 
 <div class="form-group">
-    <label class="text-white">Nombre:</label>
-    <input @bind="nombre" class="form-control bg-dark text-white" />
+    <label class="text-white">Clave:</label>
+    <input @bind="clave" class="form-control bg-dark text-white" />
 </div>
 <div class="form-group">
     <label class="text-white">Número de Celular:</label>
     <input @bind="numeroCelular" class="form-control bg-dark text-white" />
 </div>
 <div class="form-group">
-    <button @onclick="AgregarPersona" class="btn btn-primary">Agregar</button>
-    <button @onclick="EliminarPersona" class="btn btn-danger">Eliminar</button>
+    <button @onclick="AgregarUsuario" class="btn btn-primary">Agregar</button>
+</div>
+
+<div class="form-group">
+    <label class="text-white">Clave para Comprobar:</label>
+    <input @bind="claveComprobar" class="form-control bg-dark text-white" />
+</div>
+<div la="form-group">
+    <label class="text-white">Número de Celular para Comprobar:</label>
+    <input @bind="numeroComprobar" class="form-control bg-dark text-white" />
 </div>
 <div class="form-group">
-    <label class="text-white">Buscar Nombre:</label>
-    <input @bind="nombreBuscar" class="form-control bg-dark text-white" />
-    <button @onclick="BuscarPersona" class="btn btn-secondary mt-2">Buscar</button>
+    <button @onclick="ComprobarUsuario" class="btn btn-secondary">Comprobar</button>
 </div>
+
 <div class="form-group">
-    <p class="text-white">Resultado: @resultado</p>
+    <p class="text-white">Resultado: @resultadoComprobacion</p>
+    <p class="text-white">Hash de Agregar: @hashAgregar</p>
+    <p class="text-white">Hash de Comprobar: @hashComprobar</p>
 </div>
 
 <h4 class="text-center text-white">Contenido de la Tabla de Hash:</h4>
@@ -30,7 +39,7 @@
     <thead>
         <tr>
             <th>Índice</th>
-            <th>Nombre - Número de Celular</th>
+            <th>Clave - Número de Celular</th>
         </tr>
     </thead>
     <tbody>
@@ -61,69 +70,46 @@
     </tbody>
 </table>
 
-<div class="form-group mt-4">
-    <button @onclick="NavegarASimpleHash" class="btn btn-info">Ir a Tabla de Hash Simple</button>
-</div>
-
-<div class="form-group mt-4">
-    <button @onclick="NavegarAWeightedHash" class="btn btn-info">Ir a Tabla de Hash Ponderada</button>
-</div>
-
-<div class="form-group mt-4">
-    <button @onclick="NavegarALoginHash" class="btn btn-info">Ir a Simulación de Login</button>
-</div>
-
 @code {
-    private string nombre;
+    private string clave;
     private string numeroCelular;
-    private string nombreBuscar;
-    private string resultado;
-    private TablaDeHash tablaHash;
+    private string claveComprobar;
+    private string numeroComprobar;
+    private string resultadoComprobacion;
+    private int hashAgregar;
+    private int hashComprobar;
+    private TablaDeHashUsuariosASCII tablaHash;
     private NodoAgrupado[] todosLosNodosAgrupados;
 
     protected override void OnInitialized()
     {
-        tablaHash = new TablaDeHash(10, useSimpleHash: false, useWeightedHash: true);
+        tablaHash = new TablaDeHashUsuariosASCII(10);
         ActualizarTabla();
     }
 
-    private void AgregarPersona()
+    private void AgregarUsuario()
     {
-        tablaHash.Agregar(nombre, numeroCelular);
-        nombre = string.Empty;
+        tablaHash.Agregar(clave, numeroCelular, out hashAgregar);
+        clave = string.Empty;
         numeroCelular = string.Empty;
         ActualizarTabla();
     }
 
-    private void EliminarPersona()
+    private void ComprobarUsuario()
     {
-        tablaHash.Eliminar(nombre);
-        nombre = string.Empty;
-        ActualizarTabla();
-    }
-
-    private void BuscarPersona()
-    {
-        resultado = tablaHash.ObtenerValor(nombreBuscar);
+        string valor = tablaHash.ObtenerValor(claveComprobar, out hashComprobar);
+        if (valor == numeroComprobar)
+        {
+            resultadoComprobacion = "Usuario comprobado correctamente";
+        }
+        else
+        {
+            resultadoComprobacion = "Falló la comprobación del usuario";
+        }
     }
 
     private void ActualizarTabla()
     {
         todosLosNodosAgrupados = tablaHash.ObtenerTodosLosNodosAgrupados();
-    }
-
-    private void NavegarASimpleHash()
-    {
-        Navigation.NavigateTo("/simplehashtable");
-    }
-
-    private void NavegarAWeightedHash()
-    {
-        Navigation.NavigateTo("/weightedhashtable");
-    }
-
-    private void NavegarALoginHash()
-    {
-        Navigation.NavigateTo("/LOGINSIMULATOR");
     }
 }
